@@ -13,7 +13,7 @@ export type Panel = {
   layout: PanelLayout;
   shot: PanelShot;
   description: string;
-  /** Future: a generated image URL. Always null while generation is mocked or text-only. */
+  /** A served image URL once generated locally. Null until image generation runs. */
   image: string | null;
   dialogue?: string;
   narration?: string;
@@ -28,6 +28,17 @@ export type Panel = {
   lighting?: string;
   composition?: string;
   transition?: string | null;
+
+  // Image-generation debug/status metadata — set once this panel's artwork
+  // has been attempted. imageError is set instead of image on failure, so
+  // the UI can offer a per-panel retry without touching sibling panels.
+  imageSeed?: number;
+  imageWidth?: number;
+  imageHeight?: number;
+  imageGenerationTimeMs?: number;
+  imagePrompt?: string;
+  imageNegativePrompt?: string;
+  imageError?: string;
 };
 
 export type Visualization = {

@@ -14,19 +14,36 @@ const COLOR_LABEL: Record<Visualization["colorMode"], string> = {
   color: "Color",
 };
 
+export type ImageGenStatus = "idle" | "generating" | "done";
+
 type MangaResultProps = {
   visualization: Visualization;
   onRegenerate: () => void;
+  imageGenStatus: ImageGenStatus;
+  imageProgress: { completed: number; total: number } | null;
+  onGenerateImages: () => void;
+  generatingPanelId: string | null;
+  retryingPanelId: string | null;
+  onRetryPanel: (panelId: string) => void;
 };
 
-export function MangaResult({ visualization, onRegenerate }: MangaResultProps) {
+export function MangaResult({
+  visualization,
+  onRegenerate,
+  imageGenStatus,
+  imageProgress,
+  onGenerateImages,
+  generatingPanelId,
+  retryingPanelId,
+  onRetryPanel,
+}: MangaResultProps) {
   return (
     <div className="animate-[fade-in_0.5s_ease] motion-reduce:animate-none">
       <div className="flex flex-wrap items-end justify-between gap-4 border-t border-accent pt-8">
         <div>
           <Kicker>Your scene</Kicker>
           <h2 className="mt-3 font-display text-2xl text-ink sm:text-3xl">
-            The scene, panel by panel.
+            {imageGenStatus === "idle" ? "Your storyboard is ready." : "The scene, panel by panel."}
           </h2>
         </div>
         <div className="text-right text-xs uppercase tracking-[0.08em] text-ink-soft">
@@ -40,13 +57,46 @@ export function MangaResult({ visualization, onRegenerate }: MangaResultProps) {
         </div>
       </div>
 
-      <div className="mt-8">
-        <MangaPage panels={visualization.panels} colorMode={visualization.colorMode} />
+      <div className="mt-8 flex flex-col items-center gap-3 text-center" role="status" aria-live="polite">
+        {imageGenStatus === "idle" && (
+          <>
+            <Button type="button" onClick={onGenerateImages}>
+              Generate Manga
+            </Button>
+            <p className="max-w-sm text-sm text-ink-soft">
+              Bookfy draws each panel locally, one at a time. This can take several minutes.
+            </p>
+          </>
+        )}
+        {imageGenStatus === "generating" && imageProgress && (
+          <p className="font-display text-lg italic text-ink">
+            Generating panel {Math.min(imageProgress.completed + 1, imageProgress.total)} of{" "}
+            {imageProgress.total}…
+          </p>
+        )}
+        {imageGenStatus === "done" && (
+          <p className="font-display text-lg italic text-ink">Your manga scene is ready.</p>
+        )}
       </div>
 
-      <div className="mt-10 flex justify-center">
-        <Button type="button" variant="secondary" onClick={onRegenerate}>
-          Regenerate
+      <div className="mt-8">
+        <MangaPage
+          panels={visualization.panels}
+          colorMode={visualization.colorMode}
+          generatingPanelId={generatingPanelId}
+          retryingPanelId={retryingPanelId}
+          onRetryPanel={onRetryPanel}
+        />
+      </div>
+
+      <div className="mt-10 flex flex-wrap justify-center gap-3">
+        {imageGenStatus === "done" && (
+          <Button type="button" variant="secondary" onClick={onGenerateImages}>
+            Regenerate all images
+          </Button>
+        )}
+        <Button type="button" variant="ghost" onClick={onRegenerate}>
+          Regenerate storyboard
         </Button>
       </div>
 

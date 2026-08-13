@@ -5,12 +5,15 @@ type DebugPanelProps = {
 };
 
 /**
- * Temporary developer tooling for inspecting what the AI actually understood
- * before we connect an image model. Not part of the product UI — stripped
- * from production builds.
+ * Temporary developer tooling for inspecting what the AI/image pipeline
+ * actually produced. Not part of the product UI — stripped from production
+ * builds.
  */
 export function DebugPanel({ visualization }: DebugPanelProps) {
   if (process.env.NODE_ENV === "production") return null;
+
+  const generatedPanels = visualization.panels.filter((panel) => panel.image);
+  const firstGenerated = generatedPanels[0];
 
   return (
     <details className="mx-auto mt-16 max-w-4xl border border-dashed border-accent bg-paper-warm/40 p-4 text-xs text-ink-soft">
@@ -34,6 +37,16 @@ export function DebugPanel({ visualization }: DebugPanelProps) {
           </div>
         )}
 
+        {firstGenerated && (
+          <div>
+            <p className="text-ink">Image generation</p>
+            <p>Resolution: {firstGenerated.imageWidth} × {firstGenerated.imageHeight}</p>
+            <p>
+              Panels drawn: {generatedPanels.length} / {visualization.panels.length}
+            </p>
+          </div>
+        )}
+
         <div>
           <p className="text-ink">Storyboard panels ({visualization.panels.length})</p>
           <ol className="mt-1 space-y-2">
@@ -53,6 +66,23 @@ export function DebugPanel({ visualization }: DebugPanelProps) {
                 {panel.dialogue && <p>Dialogue: “{panel.dialogue}”</p>}
                 {panel.narration && <p>Narration: {panel.narration}</p>}
                 {panel.transition && <p>Transition: {panel.transition}</p>}
+
+                {panel.image && (
+                  <div className="mt-2 border-t border-accent/40 pt-2">
+                    <p className="text-ink">Image</p>
+                    <p>Seed: {panel.imageSeed}</p>
+                    <p>Generation time: {((panel.imageGenerationTimeMs ?? 0) / 1000).toFixed(1)}s</p>
+                    {panel.imagePrompt && <p className="mt-1">Prompt: {panel.imagePrompt}</p>}
+                    {panel.imageNegativePrompt && (
+                      <p className="mt-1">Negative prompt: {panel.imageNegativePrompt}</p>
+                    )}
+                  </div>
+                )}
+                {panel.imageError && (
+                  <p className="mt-2 border-t border-accent/40 pt-2 text-ink">
+                    Image error: {panel.imageError}
+                  </p>
+                )}
               </li>
             ))}
           </ol>

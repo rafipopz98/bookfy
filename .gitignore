@@ -41,4 +41,18 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env
-plan.md
+
+# python image service
+image-service/.venv
+image-service/__pycache__
+image-service/**/__pycache__
+image-service/.env
+image-service/*.log
+
+# local model weights and caches (downloaded, not committed)
+image-service/models
+.cache/huggingface
+
+# generated manga panels (local prototype output, not committed)
+generated/*
+!generated/.gitkeep

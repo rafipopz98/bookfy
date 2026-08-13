@@ -1,0 +1,16 @@
+# torch is intentionally unpinned to a specific patch here: if you created the
+# venv with `--system-site-packages` (recommended, see README.md) it reuses
+# your existing MPS-enabled install and this line is a no-op. Otherwise pip
+# installs a fresh one — tested against 2.13.0.
+torch>=2.2
+
+diffusers==0.39.0
+transformers==5.15.0
+accelerate==1.14.0
+safetensors==0.8.0
+huggingface_hub==1.27.0
+
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+pillow==12.3.0
+python-dotenv==1.2.2
