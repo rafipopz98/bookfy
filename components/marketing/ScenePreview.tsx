@@ -1,5 +1,5 @@
 import { Kicker } from "@/components/ui/Kicker";
-import { MangaPanel } from "@/components/marketing/MangaPanel";
+import { MangaPanel } from "@/components/ui/MangaPanel";
 
 const paragraph =
   "The rain had not let up since morning. Mira pulled her coat tight and stepped into the alley, where the lamplight flickered like a nervous idea. Somewhere behind her, a door closed. She did not turn around.";

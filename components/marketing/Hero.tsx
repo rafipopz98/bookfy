@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/Button";
 import { Kicker } from "@/components/ui/Kicker";
-import { MangaPanel } from "@/components/marketing/MangaPanel";
+import { MangaPanel } from "@/components/ui/MangaPanel";
 
 export function Hero() {
   return (
