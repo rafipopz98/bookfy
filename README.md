@@ -20,10 +20,19 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 ### AI scene analysis (`/visualize`)
 
-Copy `.env.example` to `.env.local` and set `AI_GATEWAY_API_KEY` to enable the real
-scene-analysis/storyboard pipeline. Without a key, `/visualize` falls back to a fixed
-offline demo storyboard so the app stays usable — results are labeled "mock" instead
-of "ai" whenever that happens. See `app/api/visualize/storyboard/route.ts`.
+The scene-analysis/storyboard pipeline runs entirely locally through [Ollama](https://ollama.com) —
+no API keys, no external inference service:
+
+```bash
+brew install ollama
+brew services start ollama
+ollama pull qwen2.5:3b-instruct
+```
+
+Copy `.env.example` to `.env.local` if you want to override the defaults (`OLLAMA_BASE_URL`,
+`BOOKFY_AI_MODEL`). If Ollama isn't running, `/visualize` falls back to a fixed offline demo
+storyboard so the app stays usable — results are labeled "mock" instead of "ai" whenever that
+happens. See `app/api/visualize/storyboard/route.ts`.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
