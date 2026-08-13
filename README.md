@@ -18,6 +18,13 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+### AI scene analysis (`/visualize`)
+
+Copy `.env.example` to `.env.local` and set `AI_GATEWAY_API_KEY` to enable the real
+scene-analysis/storyboard pipeline. Without a key, `/visualize` falls back to a fixed
+offline demo storyboard so the app stays usable — results are labeled "mock" instead
+of "ai" whenever that happens. See `app/api/visualize/storyboard/route.ts`.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

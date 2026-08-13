@@ -1,3 +1,5 @@
+import type { SceneAnalysis, ShotType } from "@/lib/ai/schema";
+
 export type VisualStyle = "manga" | "manhwa" | "comic";
 
 export type ColorMode = "bw" | "color";
@@ -11,10 +13,21 @@ export type Panel = {
   layout: PanelLayout;
   shot: PanelShot;
   description: string;
-  /** Future: a generated image URL. Always null while generation is mocked. */
+  /** Future: a generated image URL. Always null while generation is mocked or text-only. */
   image: string | null;
   dialogue?: string;
   narration?: string;
+
+  // Populated for real AI-generated panels; absent for the demo/mock storyboard.
+  shotType?: ShotType;
+  characters?: string[];
+  location?: string | null;
+  action?: string;
+  emotion?: string;
+  importantObjects?: string[];
+  lighting?: string;
+  composition?: string;
+  transition?: string | null;
 };
 
 export type Visualization = {
@@ -24,6 +37,11 @@ export type Visualization = {
   colorMode: ColorMode;
   panelCount: number;
   panels: Panel[];
+  /** Whether this came from the real AI pipeline or the offline demo fallback. */
+  source: "ai" | "mock";
+  /** Full scene analysis, kept for the developer debug view. Only set for real AI results. */
+  sceneAnalysis?: SceneAnalysis;
+  panelCountReason?: string;
 };
 
 export type GenerationStage = {
@@ -35,8 +53,4 @@ export type GenerateVisualizationInput = {
   paragraph: string;
   style: VisualStyle;
   colorMode: ColorMode;
-};
-
-export type GenerateVisualizationOptions = {
-  onStage?: (stage: GenerationStage, index: number) => void;
 };

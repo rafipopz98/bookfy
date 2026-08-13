@@ -37,7 +37,7 @@ export function MangaPage({ panels, colorMode }: MangaPageProps) {
             )}
             style={{ animationDelay: `${index * 90}ms` }}
           >
-            {Art ? <Art /> : null}
+            {Art ? <Art /> : <PanelPlaceholder panel={panel} />}
             {panel.dialogue && (
               <span className="absolute bottom-2 right-2 border border-ink bg-paper px-2 py-1 text-xs italic text-ink">
                 {panel.dialogue}
@@ -48,4 +48,27 @@ export function MangaPage({ panels, colorMode }: MangaPageProps) {
       })}
     </div>
   );
+}
+
+// AI-generated panels have no hand-drawn art yet (image generation is a
+// future phase) — show the shot the storyboard called for and what it
+// describes, so the panel is still legible while text-only.
+function PanelPlaceholder({ panel }: { panel: Panel }) {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-3 text-center sm:p-4">
+      <span className="text-[10px] uppercase tracking-[0.1em] text-ink-soft">
+        {formatShotLabel(panel.shotType ?? panel.shot)}
+      </span>
+      <p className="line-clamp-4 font-display text-sm italic leading-snug text-ink sm:text-base">
+        {panel.description}
+      </p>
+    </div>
+  );
+}
+
+function formatShotLabel(shot: string): string {
+  return shot
+    .replace(/-/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }

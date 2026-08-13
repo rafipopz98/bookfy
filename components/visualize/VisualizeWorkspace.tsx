@@ -3,15 +3,24 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ColorSelector } from "@/components/visualize/ColorSelector";
+import { DebugPanel } from "@/components/visualize/DebugPanel";
 import { GenerationProgress } from "@/components/visualize/GenerationProgress";
 import { MangaResult } from "@/components/visualize/MangaResult";
 import { PassageEditor } from "@/components/visualize/PassageEditor";
 import { StyleSelector } from "@/components/visualize/StyleSelector";
 import { generateVisualization } from "@/lib/services/visualization";
-import { DEMO_PARAGRAPH } from "@/lib/mock/visualization";
+import { DEMO_PARAGRAPH, GENERATION_STAGES } from "@/lib/mock/visualization";
 import type { ColorMode, VisualStyle, Visualization } from "@/lib/types/visualization";
 
 type Status = "idle" | "generating" | "success" | "error";
+
+const STAGE_INTERVAL_MS = 700;
+const LAST_PROCESSING_STAGE = GENERATION_STAGES.length - 2;
+const FINAL_STAGE = GENERATION_STAGES.length - 1;
+
+function wait(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
 
 export function VisualizeWorkspace() {
   const [paragraph, setParagraph] = useState("");
@@ -33,20 +42,27 @@ export function VisualizeWorkspace() {
     setStageIndex(0);
     setErrorMessage(null);
 
-    try {
-      const result = await generateVisualization(
-        { paragraph, style, colorMode },
-        {
-          onStage: (_stage, index) => {
-            if (generationId.current === id) setStageIndex(index);
-          },
-        }
-      );
-
+    // The real backend is a single request/response — this timer just gives
+    // the wait a sense of progress. It never claims "ready" before the
+    // actual response arrives.
+    const timer = setInterval(() => {
       if (generationId.current !== id) return;
+      setStageIndex((current) => Math.min(current + 1, LAST_PROCESSING_STAGE));
+    }, STAGE_INTERVAL_MS);
+
+    try {
+      const result = await generateVisualization({ paragraph, style, colorMode });
+      if (generationId.current !== id) return;
+
+      clearInterval(timer);
+      setStageIndex(FINAL_STAGE);
+      await wait(300);
+      if (generationId.current !== id) return;
+
       setVisualization(result);
       setStatus("success");
     } catch (error) {
+      clearInterval(timer);
       if (generationId.current !== id) return;
       setErrorMessage(
         error instanceof Error ? error.message : "Something went wrong composing this scene."
@@ -90,7 +106,8 @@ export function VisualizeWorkspace() {
             {status === "generating" ? "Visualizing…" : "Visualize Scene"}
           </Button>
           <p className="text-sm text-ink-soft">
-            This is a prototype — panels are a demo, not a real reading of your passage yet.
+            Bookfy reads your passage and composes a storyboard — panel artwork comes in a
+            future phase.
           </p>
         </div>
       </div>
@@ -111,6 +128,7 @@ export function VisualizeWorkspace() {
       {status === "success" && visualization && (
         <div className="mt-16">
           <MangaResult visualization={visualization} onRegenerate={handleVisualize} />
+          <DebugPanel visualization={visualization} />
         </div>
       )}
     </div>

@@ -1,6 +1,5 @@
 import type {
   GenerateVisualizationInput,
-  GenerateVisualizationOptions,
   GenerationStage,
   Panel,
   Visualization,
@@ -15,14 +14,14 @@ export const DEMO_PARAGRAPH =
   "landlady's door, waited for silence, then went down anyway, one hand trailing the wall, " +
   "feeling for the turn in the dark.";
 
+// Generic UI copy shown while a request is in flight, regardless of whether
+// it resolves via the real AI pipeline or the offline demo fallback.
 export const GENERATION_STAGES: GenerationStage[] = [
   { id: "reading", label: "Reading the passage…" },
   { id: "beats", label: "Finding the important moments…" },
   { id: "panels", label: "Composing the panels…" },
   { id: "ready", label: "Your scene is ready." },
 ];
-
-const STAGE_DELAYS = [650, 750, 750, 400];
 
 const DEMO_PANELS: Array<Omit<Panel, "id" | "image">> = [
   {
@@ -61,40 +60,18 @@ const DEMO_PANELS: Array<Omit<Panel, "id" | "image">> = [
   },
 ];
 
-function buildPanels(): Panel[] {
-  return DEMO_PANELS.map((panel, index) => ({
+/**
+ * Offline demo storyboard used when no AI Gateway credentials are configured.
+ * Always resolves with the same fixed panels — a development fallback, not a
+ * real reading of the given passage. `source: "mock"` keeps that honest for
+ * both the debug view and the on-page UI.
+ */
+export function buildMockVisualization(input: GenerateVisualizationInput): Visualization {
+  const panels: Panel[] = DEMO_PANELS.map((panel, index) => ({
     ...panel,
     id: `panel-${index + 1}`,
     image: null,
   }));
-}
-
-function wait(ms: number) {
-  return new Promise<void>((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Simulates the future AI generation pipeline. Always resolves with the same
- * demo storyboard — this is a frontend prototype, not a real analyzer. Typing
- * "failtest" as the whole passage triggers the mock failure state for QA.
- */
-export async function mockGenerateVisualization(
-  input: GenerateVisualizationInput,
-  options: GenerateVisualizationOptions = {}
-): Promise<Visualization> {
-  const { onStage } = options;
-  const shouldFail = input.paragraph.trim().toLowerCase() === "failtest";
-
-  for (let index = 0; index < GENERATION_STAGES.length; index += 1) {
-    onStage?.(GENERATION_STAGES[index], index);
-    await wait(STAGE_DELAYS[index] ?? 600);
-
-    if (shouldFail && index === 1) {
-      throw new Error("Bookfy couldn't compose this scene. Please try again.");
-    }
-  }
-
-  const panels = buildPanels();
 
   return {
     id: `viz-${Date.now()}`,
@@ -103,5 +80,6 @@ export async function mockGenerateVisualization(
     colorMode: input.colorMode,
     panelCount: panels.length,
     panels,
+    source: "mock",
   };
 }

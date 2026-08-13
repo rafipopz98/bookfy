@@ -29,10 +29,15 @@ export function MangaResult({ visualization, onRegenerate }: MangaResultProps) {
             The scene, panel by panel.
           </h2>
         </div>
-        <p className="text-xs uppercase tracking-[0.08em] text-ink-soft">
-          {visualization.panelCount} panels · {COLOR_LABEL[visualization.colorMode]}{" "}
-          {STYLE_LABEL[visualization.style]}
-        </p>
+        <div className="text-right text-xs uppercase tracking-[0.08em] text-ink-soft">
+          <p>
+            {visualization.panelCount} panels · {COLOR_LABEL[visualization.colorMode]}{" "}
+            {STYLE_LABEL[visualization.style]}
+          </p>
+          {visualization.source === "mock" && (
+            <p className="mt-1 text-ink">Demo storyboard — not a real reading of this passage</p>
+          )}
+        </div>
       </div>
 
       <div className="mt-8">
