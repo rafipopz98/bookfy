@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Agent, fetch as undiciFetch } from "undici";
 import { sceneAnalysisSchema } from "@/lib/ai/schema";
 import { buildImagePanels } from "@/lib/ai/image/characterBible";
 import { checkImageServiceHealth, getImageServiceBaseUrl } from "@/lib/ai/image/client";
@@ -16,6 +17,16 @@ const requestSchema = z.object({
 
 const SERVICE_UNAVAILABLE_ERROR =
   "Local image generation service isn't running. Start it with: cd image-service && source .venv/bin/activate && python app.py";
+
+// Sequential local generation can take well past undici's 5-minute default
+// bodyTimeout/headersTimeout — a 12-panel storyboard at ~90s/panel runs
+// ~18 minutes. Node's global fetch doesn't expose per-call timeout options,
+// so this call goes through undici's own fetch with a dedicated dispatcher
+// sized to the max storyboard length (12 panels).
+const imageServiceDispatcher = new Agent({
+  headersTimeout: 20 * 60_000,
+  bodyTimeout: 20 * 60_000,
+});
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -39,9 +50,9 @@ export async function POST(request: Request) {
 
   const imagePanels = buildImagePanels(input);
 
-  let upstream: Response;
+  let upstream: Awaited<ReturnType<typeof undiciFetch>>;
   try {
-    upstream = await fetch(`${getImageServiceBaseUrl()}/generate-storyboard`, {
+    upstream = await undiciFetch(`${getImageServiceBaseUrl()}/generate-storyboard`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -50,6 +61,7 @@ export async function POST(request: Request) {
         colorMode: input.colorMode,
         panels: imagePanels,
       }),
+      dispatcher: imageServiceDispatcher,
     });
   } catch (error) {
     console.error("Bookfy image generation request failed:", error);
@@ -66,8 +78,10 @@ export async function POST(request: Request) {
 
   // Stream the Python service's NDJSON progress events straight through to
   // the browser — this is what gives the UI real "panel X of N" updates
-  // instead of a simulated timer.
-  return new Response(upstream.body, {
+  // instead of a simulated timer. Cast needed: undici's ReadableStream type
+  // (stream/web) and lib.dom's ReadableStream type differ structurally even
+  // though they're the same object shape at runtime.
+  return new Response(upstream.body as unknown as ReadableStream<Uint8Array>, {
     headers: {
       "Content-Type": "application/x-ndjson",
       "Cache-Control": "no-store",

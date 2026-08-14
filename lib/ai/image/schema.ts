@@ -6,6 +6,12 @@ import { sceneAnalysisSchema, shotTypeSchema } from "@/lib/ai/schema";
  * Field names match exactly — camelCase on both sides.
  */
 
+// Mirrors PanelLayout in lib/types/visualization.ts. Layout is a manga-PAGE
+// composition concept (how big this panel is on the page) — independent of
+// shotType (what the camera is doing within the panel). Both flow through to
+// the image prompt separately; see image-service/prompts.py.
+export const panelLayoutSchema = z.enum(["large", "tall", "wide", "small", "medium", "cinematic"]);
+
 // The subset of the UI-mapped Panel shape (lib/types/visualization.ts) the
 // image pipeline needs from a client request. No pre-existing zod schema
 // covers Panel itself, since it's derived UI state, not raw AI output.
@@ -13,6 +19,7 @@ export const panelRequestSchema = z.object({
   id: z.string(),
   description: z.string(),
   shotType: shotTypeSchema.optional(),
+  layout: panelLayoutSchema,
   action: z.string().optional(),
   emotion: z.string().optional(),
   location: z.string().nullable().optional(),
@@ -20,6 +27,7 @@ export const panelRequestSchema = z.object({
   lighting: z.string().optional(),
   composition: z.string().optional(),
   characters: z.array(z.string()).optional(),
+  dialogue: z.string().optional(),
 });
 
 export const characterBibleEntrySchema = z.object({
@@ -45,6 +53,7 @@ export const imageStoryboardPanelSchema = z.object({
   id: z.string(),
   index: z.number().int(),
   shotType: z.string(),
+  layout: z.string(),
   visualDescription: z.string(),
   action: z.string(),
   emotion: z.string(),
@@ -53,6 +62,7 @@ export const imageStoryboardPanelSchema = z.object({
   composition: z.string(),
   characters: z.array(characterBibleEntrySchema),
   locationDetail: locationBibleEntrySchema.nullable(),
+  dialogue: z.string().optional(),
 });
 
 export const panelImageResultSchema = z.object({

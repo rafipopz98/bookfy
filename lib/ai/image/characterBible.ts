@@ -47,6 +47,7 @@ type ImageSourcePanel = Pick<
   | "id"
   | "description"
   | "shotType"
+  | "layout"
   | "action"
   | "emotion"
   | "location"
@@ -54,6 +55,7 @@ type ImageSourcePanel = Pick<
   | "lighting"
   | "composition"
   | "characters"
+  | "dialogue"
 >;
 
 function buildImagePanel(
@@ -72,6 +74,7 @@ function buildImagePanel(
     id: panel.id,
     index,
     shotType: panel.shotType ?? "medium",
+    layout: panel.layout,
     visualDescription: panel.description,
     action: panel.action ?? "",
     emotion: panel.emotion ?? "",
@@ -80,6 +83,7 @@ function buildImagePanel(
     composition: panel.composition ?? "",
     characters,
     locationDetail,
+    dialogue: panel.dialogue,
   };
 }
 

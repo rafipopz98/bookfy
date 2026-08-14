@@ -23,40 +23,56 @@ export const GENERATION_STAGES: GenerationStage[] = [
   { id: "ready", label: "Your scene is ready." },
 ];
 
+// Fixed demo panels — not a real reading of whatever the user actually
+// typed (see buildMockVisualization below). Deliberately avoids naming an
+// invented character: the demo paragraph mentions no name, so the panels
+// don't either. No invented dialogue, no invented narration beyond what the
+// demo paragraph's own opening line already states.
 const DEMO_PANELS: Array<Omit<Panel, "id" | "image">> = [
   {
     layout: "large",
     shot: "establishing",
+    shotType: "establishing",
     description:
       "A cramped attic room under a low, slanted ceiling — heat presses through the walls at dusk.",
     narration: "The attic room had grown unbearable by evening.",
+    lighting: "dim dusk light",
   },
   {
     layout: "tall",
     shot: "close-up",
-    description: "Pyotr's face, tense and damp with heat, counting the stairs before he moves.",
+    shotType: "closeUp",
+    description: "The young man's face, tense and damp with heat, counting the stairs before he moves.",
+    emotion: "anxious",
+    lighting: "dim warm light",
   },
   {
     layout: "wide",
     shot: "action",
+    shotType: "action",
     description:
       "He descends the narrow staircase, one hand trailing the wall, weight held carefully on each step.",
+    lighting: "dim light",
   },
   {
     layout: "small",
     shot: "detail",
+    shotType: "detail",
     description: "The seventh step — the one that always groans underfoot.",
   },
   {
     layout: "medium",
     shot: "detail",
+    shotType: "detail",
     description: "The landlady's door, shut and silent.",
-    dialogue: "…",
+    lighting: "dim hallway light",
   },
   {
     layout: "cinematic",
     shot: "atmosphere",
+    shotType: "atmospheric",
     description: "The stairwell empties into darkness below — heavy, humid, and still.",
+    lighting: "near darkness",
   },
 ];
 

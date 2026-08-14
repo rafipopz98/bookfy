@@ -51,9 +51,11 @@ export function MangaResult({
             {visualization.panelCount} panels · {COLOR_LABEL[visualization.colorMode]}{" "}
             {STYLE_LABEL[visualization.style]}
           </p>
-          {visualization.source === "mock" && (
-            <p className="mt-1 text-ink">Demo storyboard — not a real reading of this passage</p>
-          )}
+          <p className="mt-1 text-ink">
+            {visualization.source === "mock"
+              ? "Demo storyboard — not a real reading of this passage"
+              : "Real AI — read from your passage"}
+          </p>
         </div>
       </div>
 

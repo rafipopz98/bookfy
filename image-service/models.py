@@ -47,6 +47,9 @@ class StoryboardPanelInput(CamelModel):
     id: str
     index: int
     shot_type: str
+    """Camera/composition concept (establishing, closeUp, action, ...) — see prompts.py."""
+    layout: str = "medium"
+    """Manga-page size concept (large, tall, small, ...) — independent of shot_type."""
     visual_description: str
     action: str = ""
     emotion: str = ""
@@ -55,6 +58,8 @@ class StoryboardPanelInput(CamelModel):
     composition: str = ""
     characters: List[CharacterBibleEntry] = []
     location_detail: Optional[LocationBibleEntry] = None
+    dialogue: Optional[str] = None
+    """Presence is used as a "speaking" cue — the literal text is never rendered."""
 
 
 class GenerateRequest(CamelModel):
